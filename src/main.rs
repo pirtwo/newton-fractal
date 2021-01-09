@@ -12,9 +12,9 @@ fn main() {
 
     if args.len() == 4 {
         let threads = 7;
-        let path = args[0].clone();
+        let path = &args[0];
         let bounds: (usize, usize) =
-            parse_pair(&args[1], &sep).expect("error, invalid image dimention !!!");
+            parse_pair(&args[1], &sep).expect("error, invalid image dimension !!!");
 
         let (plane_ul, plane_br) = (
             parse_complex::<f64>(&args[2], &sep).expect("error invalid args !!!"),
@@ -42,12 +42,13 @@ fn main() {
         )
         .expect("error, can't create image !!!");
     } else {
-        println!("Usage: [PATH] [IMG-DIM] [PLANE-DIM]");
-        println!("Image Dimentions: [width, height]");
-        println!("Complex Plane Dimentions: Top-Left[re, im] bottom-Right[re, im]");
+        println!("Usage: [PATH] [x,y] [re,im]");
+        println!("Image Dimensions: [width, height]");
+        println!("Complex Plane: Top-Left[re, im] Bottom-Right[re, im]");
     }
 }
 
+/// parses a pair values seperated by a char into a tuple.
 fn parse_pair<T: FromStr>(s: &str, sep: &char) -> Option<(T, T)> {
     match s.find(*sep) {
         Some(index) => match (T::from_str(&s[..index]), T::from_str(&s[index + 1..])) {
@@ -58,6 +59,7 @@ fn parse_pair<T: FromStr>(s: &str, sep: &char) -> Option<(T, T)> {
     }
 }
 
+/// parses a re and im values seperated by char into complex.
 fn parse_complex<T: FromStr>(s: &str, sep: &char) -> Option<Complex<T>> {
     match parse_pair::<T>(&s, sep) {
         Some((re, im)) => Some(Complex::new(re, im)),
@@ -65,6 +67,7 @@ fn parse_complex<T: FromStr>(s: &str, sep: &char) -> Option<Complex<T>> {
     }
 }
 
+/// maps pixel cordinate to complex plane.
 fn pixel_to_complex(
     bounds: (usize, usize),
     pixel: (usize, usize),
@@ -77,6 +80,7 @@ fn pixel_to_complex(
     }
 }
 
+/// renders fractal.
 fn render(
     chunk: &mut [u8],
     chunk_bounds: (usize, usize),
@@ -84,7 +88,7 @@ fn render(
     plane_bounds: (Complex<f64>, Complex<f64>),
 ) {
     let tol = 0.0001;
-    let mult = 15;
+    let mul = 15;
     let max_count = 255;
     let r1: Complex<f64> = Complex::new(1.0, 0.0);
     let r2: Complex<f64> = Complex::new(-0.5, (2.0 * PI / 3.0).sin() as f64);
@@ -105,7 +109,7 @@ fn render(
                 count += 1;
             }
 
-            chunk[y * image_bounds.0 + x] = (255 - count * mult) as u8;
+            chunk[y * image_bounds.0 + x] = (255 - count * mul) as u8;
         }
     }
 }
